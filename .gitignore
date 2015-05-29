@@ -1,0 +1,5 @@
+*.log
+fifo
+/ve_python
+/ve3/*
+*.pyc
