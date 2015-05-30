@@ -3,9 +3,12 @@
 import pins
 import tw
 import spaceapi
+import filesys
 
 pins.EnableRed( True )
 pins.EnableGreen( False )
+
+filesys.SaveStatus('Closed')
 
 tw.SendTweet( False )
 
