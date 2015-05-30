@@ -11,5 +11,5 @@ source /home/leinelab/ampel/ve3/bin/activate
 echo "Starte Ampel-Skript..."
 
 # Start Ampel
-/home/leinelab/ampel/foreman.py 2>&1 | tee /home/leinelab/ampel/ampel.log
-#/home/leinelab/ampel/foreman.py
+#/home/leinelab/ampel/foreman.py 2>&1 | tee /home/leinelab/ampel/ampel.log
+/home/leinelab/ampel/foreman.py

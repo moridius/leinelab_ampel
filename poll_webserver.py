@@ -7,6 +7,15 @@ import datetime
 import time
 import sys
 
+fpid = os.fork()
+
+#util.log_file = 'daemon.log'
+
+if fpid != 0:
+    #util.log('daemon started.')
+    #util.log('pid=' + str(fpid))
+    sys.exit(0) # stop parent process, child continues
+
 print( "Start poll script." )
 sys.stdout.flush()
 

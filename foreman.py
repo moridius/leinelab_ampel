@@ -7,6 +7,16 @@ import subprocess
 import sys
 import os
 
+fpid = os.fork()
+
+#util.log_file = 'daemon.log'
+
+if fpid != 0:
+    #util.log('daemon started.')
+    #util.log('pid=' + str(fpid))
+    sys.exit(0) # stop parent process, child continues
+            
+
 g_fifo_path = "/home/leinelab/ampel/fifo"
 if not os.path.exists( g_fifo_path ):
     os.mkfifo( g_fifo_path )
@@ -20,12 +30,12 @@ def AmpelLog( logStr ):
 
 def PollForCommand():
     global g_fifo
-    AmpelLog( "Poll for command..." )
-    #try:
-    content = g_fifo.read() # .decode() ?
-    #except:
-    #    AmpelLog( "Couldn't decode command." )
-    #    return ""
+    #AmpelLog( "Poll for command..." )
+    try:
+        content = g_fifo.read() # .decode() ?
+    except:
+        AmpelLog( "Couldn't decode command." )
+        return ""
 
     # security feature 
     if content != "" and content[0] not in './~':
@@ -77,4 +87,4 @@ while True:
 
         AmpelLog( "Run new command..." )
         current_command = RunCommand( command )
-    time.sleep( 5 )
+    time.sleep( 1 )

@@ -2,22 +2,24 @@
 
 import random
 import sys
+import json
 from twython import Twython
 
+credentials = {}
+
+with open('/home/leinelab/ampel/commands/credentials.json') as cred:
+    credStr = cred.read()
+    credentials = json.loads(credStr)
+
 def SendTweet( openLab ):
-    dry_run = True
+    dry_run = False
     
     #if openLab:
     #    print( "We want to open the Lab!" )
     #else:
     #    print( "We want to close the Lab!" )
 
-    apiKey            = "wKBROv4Uk5pNS8S9IiOXydKb9"
-    apiSecret         = "1sOOlFArqoooztzMNA5KSHfEzrGbFMkl4tgHjA4csDt5GzIEg3"
-    accessToken       = "887504742-mZ5mX6egJlTHtAadrz0vWQ5kknZYFeQPenjKsjQO"
-    accessTokenSecret = "eGiEUD1j3qSITil3XedVTr8UtPRYXtqeaozmGAxvAhY6d"
-
-    twitter = Twython( apiKey, apiSecret, accessToken, accessTokenSecret )
+    twitter = Twython( credentials['apiKey'], credentials['apiSecret'], credentials['accessToken'], credentials['accessTokenSecret'] )
     #print( "Initialised Twitter access." )
 
     # read possible tweets from file
