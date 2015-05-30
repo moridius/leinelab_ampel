@@ -5,6 +5,9 @@ import sys
 import json
 from twython import Twython
 
+sys.path.append("/home/leinelab/ampel")
+import util
+
 credentials = {}
 
 with open('/home/leinelab/ampel/commands/credentials.json') as cred:
@@ -46,9 +49,9 @@ def SendTweet( openLab ):
 
     if not dry_run:
         twitter.update_status( status=tweet )
-        print( "Tweeted: " + tweet )
+        util.log( "Tweeted: " + tweet )
     else:
-        print( "Tweeted: " + tweet + " (dry run)" )
+        util.log( "Tweeted: " + tweet + " (dry run)" )
     #except:
     #    print( "Couldn't choose a tweet (list empty)!", file=sys.stderr )
     #    sys.exit(3)

@@ -6,16 +6,17 @@ import time
 import subprocess
 import sys
 import os
+import util
 
 fpid = os.fork()
 
-#util.log_file = 'daemon.log'
+util.log_file = "ampel.log"
 
 if fpid != 0:
-    #util.log('daemon started.')
-    #util.log('pid=' + str(fpid))
+    util.log( "Forked foreman script." )
+    util.log( "pid: " + str(fpid) )
     sys.exit(0) # stop parent process, child continues
-            
+
 
 g_fifo_path = "/home/leinelab/ampel/fifo"
 if not os.path.exists( g_fifo_path ):
@@ -23,18 +24,13 @@ if not os.path.exists( g_fifo_path ):
 g_fifo = open( g_fifo_path, 'r' )
 
 
-def AmpelLog( logStr ):
-    print( logStr )
-    sys.stdout.flush()
-
-
 def PollForCommand():
     global g_fifo
-    #AmpelLog( "Poll for command..." )
+    #util.log( "Poll for command..." )
     try:
         content = g_fifo.read() # .decode() ?
     except:
-        AmpelLog( "Couldn't decode command." )
+        util.log( "Couldn't decode command." )
         return ""
 
     # security feature 
@@ -75,16 +71,16 @@ def RunCommand( cmdStr ):
 ## MAIN ##
 
 current_command = None
-AmpelLog( "Started. Wait for commands..." )
+util.log( "Started. Wait for commands..." )
 
 while True:
     command = PollForCommand()
     if command != "":
-        AmpelLog( "Received command: " + command )
+        util.log( "Received command: " + command )
         if IsCommandRunning( current_command ):
-            AmpelLog( "There is a running command, I'll kill it." )
+            util.log( "There is a running command, I'll kill it." )
             KillCommand( current_command )
 
-        AmpelLog( "Run new command..." )
+        util.log( "Run new command..." )
         current_command = RunCommand( command )
     time.sleep( 1 )

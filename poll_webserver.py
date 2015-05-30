@@ -6,26 +6,25 @@ import os.path
 import datetime
 import time
 import sys
+import util
 
 fpid = os.fork()
 
-#util.log_file = 'daemon.log'
+util.log_file = "poll.log"
 
 if fpid != 0:
-    #util.log('daemon started.')
-    #util.log('pid=' + str(fpid))
+    util.log( "Forked poll script." )
+    util.log( "pid: " + str(fpid) )
     sys.exit(0) # stop parent process, child continues
 
-print( "Start poll script." )
-sys.stdout.flush()
+util.log( "Start poll script." )
 
 fifo_path = "/home/leinelab/ampel/fifo"
 #if not os.path.exists( fifo_path ):
 #    os.mkfifo( fifo_path )
 #fifo = open( fifo_path, 'w' )
 
-print( "Poll script started." )
-sys.stdout.flush()
+util.log( "Poll script started." )
 
 while True:
     res = urllib.request.urlopen( "https://leinelab.net/ampel/job.php" )
@@ -34,8 +33,7 @@ while True:
         fifo = open( fifo_path, 'w' )
         fifo.write( content )
         fifo.close()
-        print( "Polled webserver and got something. " + datetime.datetime.now().isoformat() )
+        util.log( "Polled webserver and got something. " + datetime.datetime.now().isoformat() )
     else:
-        print( "Polled webserver, got nothing. " + datetime.datetime.now().isoformat() )
-    sys.stdout.flush()
+        util.log( "Polled webserver, got nothing. " + datetime.datetime.now().isoformat() )
     time.sleep( 15 )
