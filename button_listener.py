@@ -2,6 +2,15 @@
 
 import RPi.GPIO as GPIO
 import time
+import os
+
+fpid = os.fork()
+
+if fpid != 0:
+    #util.log( "Forked foreman script." )
+    #util.log( "pid: " + str(fpid) )
+    sys.exit(0) # stop parent process, child continues
+
 
 # Pin festlegen
 pin_button = 11

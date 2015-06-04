@@ -8,6 +8,9 @@ from twython import Twython
 sys.path.append("/home/leinelab/ampel")
 import util
 
+util.log_file = "twitter.log"
+util.log_append = True
+
 credentials = {}
 
 with open('/home/leinelab/ampel/commands/credentials.json') as cred:
