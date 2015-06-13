@@ -43,6 +43,6 @@ try:
             SendCommand('CloseLab')
         else:
             SendCommand('OpenLab')
-        time.sleep(4)
+        time.sleep(1)
 except:
     pass
