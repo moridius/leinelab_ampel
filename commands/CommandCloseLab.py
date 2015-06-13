@@ -8,6 +8,10 @@ import filesys
 pins.EnableRed( True )
 pins.EnableGreen( False )
 
+# avoid double postings
+if filesys.LoadStatus() == "Closed":
+	exit()
+
 filesys.SaveStatus('Closed')
 
 tw.SendTweet( False )
