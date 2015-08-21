@@ -7,21 +7,101 @@ import subprocess
 import sys
 import os
 import util
+from threading import Thread, Event
+import RPi.GPIO as gpio
+import filesys
 
-fpid = os.fork()
+class Ampel(object):
 
-util.log_file = "ampel.log"
+    def __init__(self):
+        self.pins = {
+            "red": 12,
+            "green": 16
+        }
 
-if fpid != 0:
-    util.log( "Forked foreman script." )
-    util.log( "pid: " + str(fpid) )
-    sys.exit(0) # stop parent process, child continues
+        gpio.cleanup()
+        gpio.setmode( gpio.BOARD)
+
+        for number in self.pins.values():
+             gpio.setup( number, gpio.OUT )
+
+        self.set('red')
+        self.set('green', False)
+        filesys.SaveStatus('Closed')
+
+    def set(self, pin, enable=True):
+        if enable:
+            gpio.output(self.pins[pin], gpio.HIGH)
+        else:
+            gpio.output(self.pins[pin], gpio.LOW)
+
+if "fork" in sys.argv:
+    fpid = os.fork()
+
+    util.log_file = "ampel.log"
+
+    if fpid != 0:
+        util.log( "Forked foreman script." )
+        util.log( "pid: " + str(fpid) )
+        sys.exit(0) # stop parent process, child continues
 
 
 g_fifo_path = "/home/leinelab/ampel/fifo"
 if not os.path.exists( g_fifo_path ):
     os.mkfifo( g_fifo_path )
 g_fifo = open( g_fifo_path, 'r' )
+
+
+# Tasks 
+
+class BasicTask(Thread):
+    
+    def __init__(self, ampel):
+        super().__init__()
+        self.stop = Event()
+        self.ampel = ampel
+
+    def shutdown(self):
+        self.stop.set()
+
+class Glow(BasicTask):
+
+    def run(self): 
+        util.log('Started glowing')
+
+        self.ampel.set('red', False)
+        self.ampel.set('green', True)
+        filesys.SaveStatus('Open')
+
+        while not self.stop.is_set():
+            time.sleep(1)
+
+        self.ampel.set('red', True)
+        self.ampel.set('green', False)
+        filesys.SaveStatus('Closed')
+
+        util.log('Shutting down now.')
+
+
+class Blink(BasicTask):
+
+    def run(self): 
+        util.log('Started glowing')
+
+        self.ampel.set('red', False)
+        self.ampel.set('green', True)
+
+        while not self.stop.is_set():
+            self.ampel.set('red', True)
+            self.ampel.set('green', True)
+            time.sleep(1)
+            self.ampel.set('red', False)
+            self.ampel.set('green', False)
+            time.sleep(1)
+
+        self.ampel.set('red', True)
+
+        util.log('Shutting down now.')
 
 
 def PollForCommand():
@@ -35,52 +115,31 @@ def PollForCommand():
 
     # security feature 
     if content != "" and content[0] not in './~':
-        return content
+        return content.replace('\n', '')
     else:
         return ""
 
 
-def IsCommandRunning( cmd ):
-    try:
-        return ( cmd.poll() == None )
-    except:
-        return False
-
-
-def KillCommand( cmd ):
-    try:
-        cmd.terminate()
-    except:
-        pass
-
-
-def RunCommand( cmdStr ):
-    if cmdStr == "":
-        return None
-
-    cmd_parts = cmdStr.split()
-    cmd = [ "/home/leinelab/ampel/commands/Command" + cmd_parts[0] + ".py" ]
-    cmd += cmd_parts[1:]
-
-    try:
-        return subprocess.Popen( cmd )
-    except:
-        pass
-
-
 ## MAIN ##
 
-current_command = None
+ampel = Ampel()
+
+current_task = None
 util.log( "Started. Wait for commands..." )
 
 while True:
     command = PollForCommand()
-    if command != "":
-        util.log( "Received command: " + command )
-        if IsCommandRunning( current_command ):
-            util.log( "There is a running command, I'll kill it." )
-            KillCommand( current_command )
-
-        util.log( "Run new command..." )
-        current_command = RunCommand( command )
-    time.sleep( 1 )
+   
+    if command == "":
+        continue
+    
+    print(command)
+    
+    if command == "OpenLab" and current_task is None:
+        current_task = Glow(ampel)
+        current_task.start()
+        
+    if command == "CloseLab" and current_task is not None:
+        current_task.shutdown()
+        current_task = None
+	

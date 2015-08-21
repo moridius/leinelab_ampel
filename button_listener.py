@@ -3,6 +3,7 @@
 import RPi.GPIO as GPIO
 import time
 import os
+import sys
 
 fpid = os.fork()
 
@@ -38,11 +39,10 @@ def SendCommand(commandStr):
 
 try:
     while True:
-        GPIO.wait_for_edge( pin_button, GPIO.RISING )
+        GPIO.wait_for_edge( pin_button, GPIO.FALLING )
         if GetStatus() == 'Open':
             SendCommand('CloseLab')
         else:
             SendCommand('OpenLab')
-        time.sleep(1)
 except:
     pass
