@@ -25,10 +25,6 @@ class Ampel(object):
         for number in self.pins.values():
              gpio.setup( number, gpio.OUT )
 
-        self.set('red')
-        self.set('green', False)
-        filesys.SaveStatus('Closed')
-
     def set(self, pin, enable=True):
         if enable:
             gpio.output(self.pins[pin], gpio.HIGH)
@@ -46,11 +42,6 @@ if "fork" in sys.argv:
         sys.exit(0) # stop parent process, child continues
 
 
-g_fifo_path = "/home/leinelab/ampel/fifo"
-if not os.path.exists( g_fifo_path ):
-    os.mkfifo( g_fifo_path )
-g_fifo = open( g_fifo_path, 'r' )
-
 
 # Tasks 
 
@@ -63,33 +54,21 @@ class BasicTask(Thread):
 
     def shutdown(self):
         self.stop.set()
+        # wait until the Task has finished his work
+        self.join()
 
-class Glow(BasicTask):
+class Opened(BasicTask):
 
     def run(self): 
-        util.log('Started glowing')
+        util.log('Opened')
 
-        self.ampel.set('red', False)
         self.ampel.set('green', True)
-        filesys.SaveStatus('Open')
-
-        while not self.stop.is_set():
-            time.sleep(1)
-
-        self.ampel.set('red', True)
-        self.ampel.set('green', False)
-        filesys.SaveStatus('Closed')
-
-        util.log('Shutting down now.')
-
+        self.ampel.set('red', False)
 
 class Blink(BasicTask):
 
     def run(self): 
-        util.log('Started glowing')
-
-        self.ampel.set('red', False)
-        self.ampel.set('green', True)
+        util.log('Started blinking')
 
         while not self.stop.is_set():
             self.ampel.set('red', True)
@@ -99,16 +78,22 @@ class Blink(BasicTask):
             self.ampel.set('green', False)
             time.sleep(1)
 
+
+class Closed(BasicTask):
+
+    def run(self):
+        util.log('Closed')
+
+        self.ampel.set('green', False)
         self.ampel.set('red', True)
-
-        util.log('Shutting down now.')
-
 
 def PollForCommand():
     global g_fifo
     #util.log( "Poll for command..." )
     try:
         content = g_fifo.read() # .decode() ?
+    except KeyboardInterrupt:
+        exit(0)
     except:
         util.log( "Couldn't decode command." )
         return ""
@@ -124,8 +109,22 @@ def PollForCommand():
 
 ampel = Ampel()
 
-current_task = None
 util.log( "Started. Wait for commands..." )
+
+current_task = None
+def change_task(new_task):
+    global current_task
+    if current_task is not None:
+        current_task.shutdown()
+    current_task = new_task(ampel)
+    current_task.start()
+
+change_task(Closed)
+
+g_fifo_path = "/home/leinelab/ampel/fifo"
+if not os.path.exists( g_fifo_path ):
+    os.mkfifo( g_fifo_path )
+g_fifo = open( g_fifo_path, 'r' )
 
 while True:
     command = PollForCommand()
@@ -133,13 +132,22 @@ while True:
     if command == "":
         continue
     
-    print(command)
+    util.log(command)
     
-    if command == "OpenLab" and current_task is None:
-        current_task = Glow(ampel)
-        current_task.start()
-        
-    if command == "CloseLab" and current_task is not None:
-        current_task.shutdown()
-        current_task = None
-	
+    if command == "OpenLab":
+        if type(current_task) is not Opened:
+            change_task(Opened)
+
+    elif command == "CloseLab":
+        if type(current_task) is not Closed:
+            change_task(Closed)
+    
+    elif command == "BlinkLab":
+        if type(current_task) is not Blink:
+            change_task(Blink)
+    
+    elif command == "ButtonPressed":
+        if type(current_task) is not Closed:
+            change_task(Closed)
+        else:
+            change_task(Opened)
