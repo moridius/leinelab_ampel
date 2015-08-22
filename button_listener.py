@@ -5,19 +5,21 @@ import time
 import os
 import sys
 
-fpid = os.fork()
+if 'fork' in sys.argv:
+    fpid = os.fork()
 
-if fpid != 0:
-    #util.log( "Forked foreman script." )
-    #util.log( "pid: " + str(fpid) )
-    sys.exit(0) # stop parent process, child continues
+    if fpid != 0:
+        print('Forked.')
+        sys.exit(0) # stop parent process, child continues
 
+debug = False
+if 'debug' in sys.argv:
+    debug = True
 
 # Pin festlegen
 pin_button = 11
 USE_GPIO = True
 fifo = '/home/leinelab/ampel/fifo'
-status_file = '/home/leinelab/ampel/commands/status'
 
 GPIO.cleanup( )
 GPIO.setmode( GPIO.BOARD )
@@ -29,20 +31,12 @@ def GetPin( pin ):
     else:
         return True
 
-def GetStatus():
-    with open(status_file) as f:
-        return f.read()
-
 def SendCommand(commandStr):
     with open(fifo, 'w') as f:
         f.write(commandStr + '\n')
 
-try:
-    while True:
-        GPIO.wait_for_edge( pin_button, GPIO.FALLING )
-        if GetStatus() == 'Open':
-            SendCommand('CloseLab')
-        else:
-            SendCommand('OpenLab')
-except:
-    pass
+while True:
+    GPIO.wait_for_edge( pin_button, GPIO.FALLING )
+    if debug:
+        print('ButtonPressed')
+    SendCommand('ButtonPressed')
