@@ -1,15 +1,16 @@
 #!/home/leinelab/ampel/ve_python
 
-import urllib.request
-
 import time
 import subprocess
+import requests
 import sys
 import os
 import util
 from threading import Thread, Event
 import RPi.GPIO as gpio
 import filesys
+
+SPACEAPI_URL = 'https://leinelab.net/ampel/spaceapi.php?open=%s'
 
 class Ampel(object):
 
@@ -61,9 +62,13 @@ class Opened(BasicTask):
 
     def run(self): 
         util.log('Opened')
-
+        
         self.ampel.set('green', True)
         self.ampel.set('red', False)
+
+        # open spaceapi
+        requests.get(SPACEAPI_URL % '1')
+
 
 class Blink(BasicTask):
 
@@ -86,6 +91,10 @@ class Closed(BasicTask):
 
         self.ampel.set('green', False)
         self.ampel.set('red', True)
+
+        # close spaceapi
+        requests.get(SPACEAPI_URL % '0')
+
 
 def PollForCommand():
     global g_fifo
