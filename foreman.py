@@ -1,4 +1,4 @@
-#!/home/leinelab/ampel/ve_python
+#!/usr/bin/python3
 
 import time
 import subprocess
