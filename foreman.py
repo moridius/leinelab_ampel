@@ -8,7 +8,6 @@ import os
 import util
 from threading import Thread, Event
 import RPi.GPIO as gpio
-import filesys
 
 SPACEAPI_URL = 'https://leinelab.net/ampel/spaceapi.php?open=%s'
 
