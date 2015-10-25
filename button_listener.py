@@ -5,13 +5,6 @@ import time
 import os
 import sys
 
-if 'fork' in sys.argv:
-    fpid = os.fork()
-
-    if fpid != 0:
-        print('Forked.')
-        sys.exit(0) # stop parent process, child continues
-
 debug = False
 if 'debug' in sys.argv:
     debug = True

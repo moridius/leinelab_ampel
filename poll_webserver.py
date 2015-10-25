@@ -8,21 +8,10 @@ import time
 import sys
 import util
 
-fpid = os.fork()
-
 util.log_file = "poll.log"
-
-if fpid != 0:
-    util.log( "Forked poll script." )
-    util.log( "pid: " + str(fpid) )
-    sys.exit(0) # stop parent process, child continues
-
 util.log( "Start poll script." )
 
 fifo_path = "/var/run/ampel.fifo"
-#if not os.path.exists( fifo_path ):
-#    os.mkfifo( fifo_path )
-#fifo = open( fifo_path, 'w' )
 
 util.log( "Poll script started." )
 

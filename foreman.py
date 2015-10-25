@@ -32,17 +32,6 @@ class Ampel(object):
         else:
             gpio.output(self.pins[pin], gpio.LOW)
 
-if "fork" in sys.argv:
-    fpid = os.fork()
-
-    util.log_file = "ampel.log"
-
-    if fpid != 0:
-        util.log( "Forked foreman script." )
-        util.log( "pid: " + str(fpid) )
-        sys.exit(0) # stop parent process, child continues
-
-
 
 # Tasks 
 
