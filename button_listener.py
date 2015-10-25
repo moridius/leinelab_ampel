@@ -19,7 +19,7 @@ if 'debug' in sys.argv:
 # Pin festlegen
 pin_button = 11
 USE_GPIO = True
-fifo = '/home/leinelab/ampel/fifo'
+fifo = '/var/run/ampel.fifo'
 
 GPIO.cleanup( )
 GPIO.setmode( GPIO.BOARD )

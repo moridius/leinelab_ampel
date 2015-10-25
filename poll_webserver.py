@@ -19,7 +19,7 @@ if fpid != 0:
 
 util.log( "Start poll script." )
 
-fifo_path = "/home/leinelab/ampel/fifo"
+fifo_path = "/var/run/ampel.fifo"
 #if not os.path.exists( fifo_path ):
 #    os.mkfifo( fifo_path )
 #fifo = open( fifo_path, 'w' )
