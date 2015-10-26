@@ -118,10 +118,7 @@ def change_task(new_task):
 
 change_task(Closed)
 
-g_fifo_path = "/var/run/ampel.fifo"
-if not os.path.exists( g_fifo_path ):
-    os.mkfifo( g_fifo_path )
-g_fifo = open( g_fifo_path, 'r' )
+g_fifo = util.open_fifo('r')
 
 while True:
     command = PollForCommand()

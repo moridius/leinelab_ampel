@@ -5,10 +5,19 @@ import sys
 
 script_path = os.path.dirname(os.path.realpath(__file__))
 
+fifo_path = '/var/run/ampel.fifo'
 log_file = None
 log_append = False
 
 logger = None
+
+def open_fifo(mode):
+    global fifo_path
+    if not os.path.exists(fifo_path):
+        os.mkfifo(fifo_path)
+
+    return open(fifo_path, mode)
+
 
 def log(output):
     global log_file, logger

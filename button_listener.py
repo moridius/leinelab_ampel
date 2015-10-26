@@ -4,6 +4,7 @@ import RPi.GPIO as GPIO
 import time
 import os
 import sys
+import util
 
 debug = False
 if 'debug' in sys.argv:
@@ -12,7 +13,6 @@ if 'debug' in sys.argv:
 # Pin festlegen
 pin_button = 11
 USE_GPIO = True
-fifo = '/var/run/ampel.fifo'
 
 GPIO.cleanup( )
 GPIO.setmode( GPIO.BOARD )
@@ -25,7 +25,7 @@ def GetPin( pin ):
         return True
 
 def SendCommand(commandStr):
-    with open(fifo, 'w') as f:
+    with util.open_fifo('w') as f:
         f.write(commandStr + '\n')
 
 while True:

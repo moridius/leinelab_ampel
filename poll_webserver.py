@@ -11,15 +11,13 @@ import util
 util.log_file = "poll.log"
 util.log( "Start poll script." )
 
-fifo_path = "/var/run/ampel.fifo"
-
 util.log( "Poll script started." )
 
 while True:
     res = urllib.request.urlopen( "https://leinelab.net/ampel/job.php" )
     content = res.read().decode()
     if content != "":
-        fifo = open( fifo_path, 'w' )
+        fifo = util.open_fifo( 'w' )
         fifo.write( content )
         fifo.close()
         util.log( "Polled webserver and got something. " + datetime.datetime.now().isoformat() )
