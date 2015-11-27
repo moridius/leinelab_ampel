@@ -122,6 +122,7 @@ g_fifo = util.open_fifo('r')
 
 while True:
     command = PollForCommand()
+    time.sleep(1)
    
     if command == "":
         continue
