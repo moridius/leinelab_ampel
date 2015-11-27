@@ -103,7 +103,12 @@ class Foreman(object):
 
     def __del__(self):
         self.sock.close()
-        os.remove(self.path)
+
+        # delete unix socket if it still exists
+        try:
+            os.remove(self.path)
+        except FileNotFoundError:
+            pass
         
     def loop(self):
         while True:
