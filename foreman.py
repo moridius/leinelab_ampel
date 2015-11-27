@@ -2,30 +2,37 @@
 
 import time
 import subprocess
-import requests
 import sys
 import os
 import util
+import socket
 from threading import Thread, Event
-import RPi.GPIO as gpio
-
-SPACEAPI_URL = 'https://leinelab.net/ampel/spaceapi.php?open=%s'
+#import RPi.GPIO as gpio
 
 class Ampel(object):
 
-    def __init__(self):
+    def __init__(self, dry = False):
+        self.dry = dry
         self.pins = {
             "red": 12,
             "green": 16
         }
 
+        if self.dry:
+            # no more setup needed
+            return
+        
         gpio.cleanup()
-        gpio.setmode( gpio.BOARD)
+        gpio.setmode(gpio.BOARD)
 
         for number in self.pins.values():
-             gpio.setup( number, gpio.OUT )
+            gpio.setup( number, gpio.OUT )
 
     def set(self, pin, enable=True):
+        if self.dry:
+            print(pin, enable)
+            return
+        
         if enable:
             gpio.output(self.pins[pin], gpio.HIGH)
         else:
@@ -47,18 +54,17 @@ class BasicTask(Thread):
         self.join()
 
 class Opened(BasicTask):
-
+    name = 'OpenLab'
+    
     def run(self): 
         util.log('Opened')
         
         self.ampel.set('green', True)
         self.ampel.set('red', False)
 
-        # open spaceapi
-        requests.get(SPACEAPI_URL % '1')
-
 
 class Blink(BasicTask):
+    name = 'BlinkLab'
 
     def run(self): 
         util.log('Started blinking')
@@ -73,6 +79,7 @@ class Blink(BasicTask):
 
 
 class Closed(BasicTask):
+    name = 'CloseLab'
 
     def run(self):
         util.log('Closed')
@@ -80,69 +87,65 @@ class Closed(BasicTask):
         self.ampel.set('green', False)
         self.ampel.set('red', True)
 
-        # close spaceapi
-        requests.get(SPACEAPI_URL % '0')
 
+class Foreman(object):
 
-def PollForCommand():
-    global g_fifo
-    #util.log( "Poll for command..." )
-    try:
-        content = g_fifo.read() # .decode() ?
-    except KeyboardInterrupt:
-        exit(0)
-    except:
-        util.log( "Couldn't decode command." )
-        return ""
+    def __init__(self, path):
+        self.path = path
+        self.sock = socket.socket(socket.AF_UNIX,
+                                  socket.SOCK_DGRAM)
+        self.sock.bind(path)
 
-    # security feature 
-    if content != "" and content[0] not in './~':
-        return content.replace('\n', '')
-    else:
-        return ""
+        self.ampel = Ampel(dry=True)
+        self.current_task = None
 
+        self.change_task(Closed)
 
-## MAIN ##
+    def __del__(self):
+        self.sock.close()
+        os.remove(self.path)
+        
+    def loop(self):
+        while True:
+            req, peer = self.sock.recvfrom(1024)
+            if type(req) is bytes:
+                req = req.decode('utf-8')
+                res = self.handle_command(req) or ''
+                res = res.encode('utf-8')
+                self.sock.sendto(res, peer)
 
-ampel = Ampel()
+    def handle_command(self, command):
+        if command == "OpenLab":
+            if type(self.current_task) is not Opened:
+                self.change_task(Opened)
+                return 'ok'
 
-util.log( "Started. Wait for commands..." )
+        elif command == "CloseLab":
+            if type(self.current_task) is not Closed:
+                self.change_task(Closed)
+                return 'ok'
+            
+        elif command == "BlinkLab":
+            if type(self.current_task) is not Blink:
+                self.change_task(Blink)
+                return 'ok'
+            
+        elif command == "ButtonPressed":
+            if type(self.current_task) is not Closed:
+                self.change_task(Closed)
+            else:
+                self.change_task(Opened)
+            return 'ok'
 
-current_task = None
-def change_task(new_task):
-    global current_task
-    if current_task is not None:
-        current_task.shutdown()
-    current_task = new_task(ampel)
-    current_task.start()
+        elif command == "Status":
+            return self.current_task.name
 
-change_task(Closed)
+    def change_task(self, new_task):
+        if self.current_task is not None:
+            self.current_task.shutdown()
+        self.current_task = new_task(self.ampel)
+        self.current_task.start()  
 
-g_fifo = util.open_fifo('r')
-
-while True:
-    command = PollForCommand()
-    time.sleep(1)
-   
-    if command == "":
-        continue
-    
-    util.log(command)
-    
-    if command == "OpenLab":
-        if type(current_task) is not Opened:
-            change_task(Opened)
-
-    elif command == "CloseLab":
-        if type(current_task) is not Closed:
-            change_task(Closed)
-    
-    elif command == "BlinkLab":
-        if type(current_task) is not Blink:
-            change_task(Blink)
-    
-    elif command == "ButtonPressed":
-        if type(current_task) is not Closed:
-            change_task(Closed)
-        else:
-            change_task(Opened)
+if __name__ == '__main__':
+    a = Foreman('/var/run/ampel.sock')
+    a.loop()
