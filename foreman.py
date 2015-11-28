@@ -90,13 +90,13 @@ class Closed(BasicTask):
 
 class Foreman(object):
 
-    def __init__(self, path):
+    def __init__(self, path, dry=False):
         self.path = path
         self.sock = socket.socket(socket.AF_UNIX,
                                   socket.SOCK_STREAM)
         self.sock.bind(path)
 
-        self.ampel = Ampel(dry=True)
+        self.ampel = Ampel(dry)
         self.current_task = None
 
         self.change_task(Closed)
@@ -166,5 +166,5 @@ def notify(cmd, path='/var/run/ampel.sock'):
     return res
 
 if __name__ == '__main__':
-    a = Foreman('/var/run/ampel.sock')
+    a = Foreman('/var/run/ampel.sock', dry=False)
     a.loop()
