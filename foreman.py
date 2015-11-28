@@ -1,13 +1,11 @@
 #!/usr/bin/python3
 
 import time
-import subprocess
 import sys
 import os
 import util
 import socket
 from threading import Thread, Event
-import RPi.GPIO as gpio
 
 class Ampel(object):
 
@@ -22,6 +20,9 @@ class Ampel(object):
             # no more setup needed
             return
         
+        import RPi.GPIO as gpio
+        self.gpio = gpio
+        
         gpio.cleanup()
         gpio.setmode(gpio.BOARD)
 
@@ -34,9 +35,9 @@ class Ampel(object):
             return
         
         if enable:
-            gpio.output(self.pins[pin], gpio.HIGH)
+            self.gpio.output(self.pins[pin], self.gpio.HIGH)
         else:
-            gpio.output(self.pins[pin], gpio.LOW)
+            self.gpio.output(self.pins[pin], self.gpio.LOW)
 
 
 # Tasks 
