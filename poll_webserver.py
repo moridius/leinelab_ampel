@@ -1,25 +1,27 @@
 #!/usr/bin/python3
 
 import urllib.request
-import os
-import os.path
 import datetime
 import time
-import sys
-import util
 import foreman
+import logging
 
-util.log_file = "poll.log"
-util.log( "Start poll script." )
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--log-level', type=str, default='INFO',
+                        dest='log_level')
+    
+    args = parser.parse_args()
 
-util.log( "Poll script started." )
+    FORMAT= '%(asctime)-15s %(levelname)+8s %(message)s'
+    logging.basicConfig(format=FORMAT, level=args.log_level)
 
-while True:
-    res = urllib.request.urlopen( "https://leinelab.net/ampel/job.php" )
-    content = res.read().decode()
-    if content != "":
-        foreman.notify(content)
-        util.log( "Polled webserver and got something. " + datetime.datetime.now().isoformat() )
-    else:
-        util.log( "Polled webserver, got nothing. " + datetime.datetime.now().isoformat() )
-    time.sleep( 15 )
+    while True:
+        res = urllib.request.urlopen("http://leinelab.net/ampel/job.php")
+        content = res.read().decode()
+        if content != "":
+            foreman.notify(content)
+            logging.info("Polled webserver and got something.")
+        else:
+            logging.debug("Polled webserver, got nothing.")
+        time.sleep( 15 )

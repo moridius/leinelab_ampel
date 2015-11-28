@@ -3,8 +3,8 @@
 import time
 import sys
 import os
-import util
 import socket
+import logging
 import argparse
 from threading import Thread, Event
 
@@ -31,8 +31,10 @@ class Ampel(object):
             gpio.setup( number, gpio.OUT )
 
     def set(self, pin, enable=True):
+        state = { True: 'on', False: 'off' }[enable]
+        logging.debug('%s lamp is now %s' % (pin, state))
+        
         if self.dry:
-            print(pin, enable)
             return
         
         if enable:
@@ -59,7 +61,7 @@ class Opened(BasicTask):
     name = 'OpenLab'
     
     def run(self): 
-        util.log('Opened')
+        logging.info('Opened')
         
         self.ampel.set('green', True)
         self.ampel.set('red', False)
@@ -69,7 +71,7 @@ class Blink(BasicTask):
     name = 'BlinkLab'
 
     def run(self): 
-        util.log('Started blinking')
+        logging.info('Started blinking')
 
         while not self.stop.is_set():
             self.ampel.set('red', True)
@@ -84,7 +86,7 @@ class Closed(BasicTask):
     name = 'CloseLab'
 
     def run(self):
-        util.log('Closed')
+        logging.info('Closed')
 
         self.ampel.set('green', False)
         self.ampel.set('red', True)
@@ -171,8 +173,13 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-d', '--dry-run', action='store_true',
                         dest='dry')
+    parser.add_argument('--log-level', type=str, default='INFO',
+                        dest='log_level')
 
     args = parser.parse_args()
+
+    FORMAT= '%(asctime)-15s %(levelname)+8s %(message)s'
+    logging.basicConfig(format=FORMAT, level=args.log_level)
     
     f = Foreman('/var/run/ampel.sock', dry=args.dry)
     f.loop()
