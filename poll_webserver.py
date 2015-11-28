@@ -17,7 +17,7 @@ if __name__ == '__main__':
     logging.basicConfig(format=FORMAT, level=args.log_level)
 
     while True:
-        res = urllib.request.urlopen("http://leinelab.net/ampel/job.php")
+        res = urllib.request.urlopen("http://leinelab.net/ampel/GetJob.php")
         content = res.read().decode()
         if content != "":
             foreman.notify(content)
