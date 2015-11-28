@@ -5,6 +5,7 @@ import time
 import os
 import sys
 import util
+import foreman
 
 debug = False
 if 'debug' in sys.argv:
@@ -24,12 +25,8 @@ def GetPin( pin ):
     else:
         return True
 
-def SendCommand(commandStr):
-    with util.open_fifo('w') as f:
-        f.write(commandStr + '\n')
-
 while True:
     GPIO.wait_for_edge( pin_button, GPIO.FALLING )
     if debug:
         print('ButtonPressed')
-    SendCommand('ButtonPressed')
+    foreman.notify('ButtonPressed')

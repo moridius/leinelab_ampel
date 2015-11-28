@@ -7,6 +7,7 @@ import datetime
 import time
 import sys
 import util
+import foreman
 
 util.log_file = "poll.log"
 util.log( "Start poll script." )
@@ -17,9 +18,7 @@ while True:
     res = urllib.request.urlopen( "https://leinelab.net/ampel/job.php" )
     content = res.read().decode()
     if content != "":
-        fifo = util.open_fifo( 'w' )
-        fifo.write( content )
-        fifo.close()
+        foreman.notify(content)
         util.log( "Polled webserver and got something. " + datetime.datetime.now().isoformat() )
     else:
         util.log( "Polled webserver, got nothing. " + datetime.datetime.now().isoformat() )
