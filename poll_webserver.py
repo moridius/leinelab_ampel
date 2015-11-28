@@ -13,7 +13,7 @@ if __name__ == '__main__':
     
     args = parser.parse_args()
 
-    FORMAT= '%(asctime)-15s %(levelname)+8s %(message)s'
+    FORMAT= '%(levelname)+8s %(message)s'
     logging.basicConfig(format=FORMAT, level=args.log_level)
 
     while True:
