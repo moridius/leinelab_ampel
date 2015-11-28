@@ -1,0 +1,6 @@
+[jabber]
+user = user@jabber.server
+pass = ein.geheimes.passwort
+
+[stuff]
+commands = Command1,Command2,Command3

@@ -1,6 +1,5 @@
 *.log
 fifo
-/ve_python
-/ve3/*
 *.pyc
-/commands/credentials.json
+jabber.ini
+*~
