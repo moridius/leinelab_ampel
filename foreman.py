@@ -93,7 +93,7 @@ class Foreman(object):
     def __init__(self, path):
         self.path = path
         self.sock = socket.socket(socket.AF_UNIX,
-                                  socket.SOCK_DGRAM)
+                                  socket.SOCK_STREAM)
         self.sock.bind(path)
 
         self.ampel = Ampel(dry=True)
@@ -111,13 +111,18 @@ class Foreman(object):
             pass
         
     def loop(self):
+        self.sock.listen(1)
         while True:
-            req, peer = self.sock.recvfrom(1024)
-            if type(req) is bytes:
-                req = req.decode('utf-8')
-                res = self.handle_command(req) or ''
-                res = res.encode('utf-8')
-                self.sock.sendto(res, peer)
+            conn, peer_addr = self.sock.accept()
+            try:
+                req = conn.recv(1024)
+                if type(req) is bytes:
+                    req = req.decode()
+                    res = self.handle_command(req) or ''
+                    res = res.encode()
+                    conn.send(res)
+            finally:
+                conn.close()
 
     def handle_command(self, command):
         if command == "OpenLab":
@@ -150,6 +155,15 @@ class Foreman(object):
             self.current_task.shutdown()
         self.current_task = new_task(self.ampel)
         self.current_task.start()  
+
+
+def notify(cmd, path='/var/run/ampel.sock'):
+    s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    s.connect(path)
+    s.send(cmd.encode())
+    res = s.recv(1024).decode()
+    s.close()
+    return res
 
 if __name__ == '__main__':
     a = Foreman('/var/run/ampel.sock')
