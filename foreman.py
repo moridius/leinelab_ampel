@@ -5,6 +5,7 @@ import sys
 import os
 import util
 import socket
+import argparse
 from threading import Thread, Event
 
 class Ampel(object):
@@ -167,5 +168,11 @@ def notify(cmd, path='/var/run/ampel.sock'):
     return res
 
 if __name__ == '__main__':
-    a = Foreman('/var/run/ampel.sock', dry=False)
-    a.loop()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-d', '--dry-run', action='store_true',
+                        dest='dry')
+
+    args = parser.parse_args()
+    
+    f = Foreman('/var/run/ampel.sock', dry=args.dry)
+    f.loop()
