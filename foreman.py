@@ -7,7 +7,7 @@ import os
 import util
 import socket
 from threading import Thread, Event
-#import RPi.GPIO as gpio
+import RPi.GPIO as gpio
 
 class Ampel(object):
 
