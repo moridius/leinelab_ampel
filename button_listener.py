@@ -11,6 +11,9 @@ import logging
 pin_button = 11
 
 if __name__ == '__main__':
+    FORMAT= '%(levelname)+8s %(message)s'
+    logger.basicConfig(level='DEBUG', format=FORMAT)
+
     gpio.cleanup()
     gpio.setmode(gpio.BOARD)
     gpio.setup(pin_button, gpio.IN)
