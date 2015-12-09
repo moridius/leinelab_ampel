@@ -32,7 +32,7 @@ class AmpelBot(sleekxmpp.ClientXMPP):
 
 if __name__ == '__main__':
     config = configparser.ConfigParser()
-    config.read('config.ini')
+    config.read('jabber.ini')
 
     jabber = config['jabber']
     stuff = config['stuff']
