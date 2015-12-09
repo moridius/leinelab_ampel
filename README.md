@@ -2,10 +2,10 @@
 
 ## Requirements
 
-* python3
-  * pip3 (python package manager)
-  * RPI.GPIO
-* systemd (other init systems are not implemented yet)
+* ```python3```
+  * ```pip3``` (python package manager)
+  * ```RPI.GPIO```
+* ```systemd``` (other init systems are not implemented yet)
 
 ## Config
 
@@ -40,6 +40,7 @@ $ echo -n 'OpenLab' | nc -U /var/run/ampel.sock
 * Handles Output GPIO Pins
 * Opens unix socket at ```/var/run/ampel.sock```
   * Commands are ```OpenLab```, ```CloseLab```, ```ButtonPressed``` (toggles state), ```BlinkLab``` and ```Status```
+* Dry run option ```-d``` is available, if you don't have ```RPI.GPIO```-lib
 
 ### Poll Webserver
 
