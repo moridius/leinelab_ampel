@@ -3,9 +3,9 @@
 ## Requirements
 
 * python3
-* pip3
+  * pip3 (python package manager)
+  * RPI.GPIO
 * systemd (other init systems are not implemented yet)
-* python lib RPI.GPIO
 
 ## Config
 
