@@ -41,6 +41,7 @@ $ echo -n 'OpenLab' | nc -U /var/run/ampel.sock
 * Opens unix socket at ```/var/run/ampel.sock```
   * Commands are ```OpenLab```, ```CloseLab```, ```ButtonPressed``` (toggles state), ```BlinkLab``` and ```Status```
 * Dry run option ```-d``` is available, if you don't have ```RPI.GPIO```-lib
+  * **Very useful to debug the system on your laptop**
 
 ### Poll Webserver
 
