@@ -20,6 +20,7 @@ After=network.target
 ExecStart=$exe
 KillMode=process
 Restart=always
+WorkingDirectory=$script_path
 
 [Install]
 WantedBy=multi-user.target
