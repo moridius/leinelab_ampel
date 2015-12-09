@@ -35,9 +35,10 @@ class AmpelBot(sleekxmpp.ClientXMPP):
                 answer = foreman.notify(msg['body'])
                 if answer != 'ok':
                     reply = msg.reply(answer)
+                    reply.send()
             else:
                 reply = msg.reply(HELP % ', '.join(self.commands))
-            reply.send()
+                reply.send()
 
 if __name__ == '__main__':
     config = configparser.ConfigParser()
