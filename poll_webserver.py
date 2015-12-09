@@ -18,7 +18,7 @@ if __name__ == '__main__':
 
     while True:
         res = requests.get("http://leinelab.net/ampel/GetJob.php")
-        content = res.text()
+        content = res.text
 
         if content != "":
             foreman.notify(content)
