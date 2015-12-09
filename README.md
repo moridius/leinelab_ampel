@@ -17,7 +17,7 @@ The following instructions should be executed as root.
 
 ```shell
 $ pip install -r requirements.txt
-$ sh INSTALL.sh
+$ sh INSTALL.sh  # create and update systemd.service files
 $ systemctl enable ampel_foreman
 $ systemctl enable ampel_poll_webserver
 $ systemctl enable ampel_push_webserver
