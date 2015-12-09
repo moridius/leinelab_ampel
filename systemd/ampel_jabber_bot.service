@@ -1,0 +1,11 @@
+[Unit]
+Description=Jabber bot for Ampel
+After=network.target
+
+[Service]
+ExecStart=/home/alarm/leinelab_ampel/jabber_bot.py
+KillMode=process
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

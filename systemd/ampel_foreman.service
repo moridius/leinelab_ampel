@@ -1,0 +1,11 @@
+[Unit]
+Description=Foreman for Ampel
+After=network.target
+
+[Service]
+ExecStart=/home/alarm/leinelab_ampel/foreman.py
+KillMode=process
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
