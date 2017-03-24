@@ -4,7 +4,6 @@
 
 * ```python3```
   * ```pip3``` (python package manager)
-  * ```RPI.GPIO```
 * ```systemd``` (other init systems are not implemented yet)
 
 ## Config
